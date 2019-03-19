@@ -36,11 +36,11 @@ plt.close('all')
 #np.random.seed(42)
 dt = .5
 dx = 1
-T = 10000
+T = 100000
 iterations = int(T/dt)
 n = 200
 #n = int(size/dx)
-size = 200
+size = .2
 dx = size/n
 #dt = .9 * dx**2/2
 #iterations = int(T/dt)
@@ -62,7 +62,8 @@ dxx = dx**2
 #Du, Dv, F, k = 0.16, 0.08, 0.054, 0.063 # Worms 2
 #Du, Dv, F, k = 0.16, 0.08, 0.035, 0.060 # Zebrafish
 #Du, Dv, F, k = 0.16, 0.08, 0.04, 0.065 #
-Du, Dv, Ds, F, k_v, k_s, alpha_s = 0.2*dxx, 0.1*dxx, 0.0*dxx, 0.04, 0.105, 0.0, 0. # u,v
+#Du, Dv, Ds, F, k_v, k_s, alpha_s = 0.2*dxx, 0.1*dxx, 0.0*dxx, 0.062, 0.1229, 0.0, 0. # u,v
+#Du, Dv, Ds, F, k_v, k_s, alpha_s = 0.2*dxx, 0.1*dxx, 0.0*dxx, 0.04, 0.105, 0.0, 0. # u,v
 Du, Dv, Ds, F, k_v, k_s, alpha_s = 0.2*dxx, 0.1*dxx, 0.01*dxx, 0.04, 0.105, 0.005, 0.7 # u,v,s
 
 #l_max = 1.0
@@ -94,6 +95,15 @@ u[...] = 1.0
 #    for j in range(1,l-1):
 #        U[i,j] = bivariate_gaussian(np.array([i,j]))
 #U = 1 - U
+
+#for i in range(10):
+#    n1 = np.random.randint(n-2*r)
+#    n2 = np.random.randint(n-2*r)
+#    n3 = np.random.randint(n-2*r)
+#    n4 = np.random.randint(n-2*r)
+#    
+#    U[n1-r:n1+r,n2-r:n2+r] = np.random.rand()
+#    V[n3-r:n3+r,n4-r:n4+r] = np.random.rand()
 
 m = int(n/2)
 U[m-r:m+r,m-r:m+r] = 0.50
@@ -128,13 +138,13 @@ for i in range(iterations):
 #    if i == 200:
 #        dt *= 2
     
-    if i == 4000:
-#        alpha_s = .8
-#        F = .036                # stop division, leave one survivor
-        F = .038                # stop division, leave more than one survivor, these ones live quite long
-#        u_res = 1.02
-    if i == 6000:
-        S[m-r:m+r,m-r:m+r] = 0.0
+#    if i == 4000:
+##        alpha_s = .8
+##        F = .036                # stop division, leave one survivor
+#        F = .038                # stop division, leave more than one survivor, these ones live quite long
+##        u_res = 1.02
+#    if i == 6000:
+#        S[m-r:m+r,m-r:m+r] = 0.0
     
 #    if i == 2000:
 #        u_res = 1.02
@@ -159,7 +169,9 @@ for i in range(iterations):
 
     uvv = u*v*v
     vss = v*s*s
-    u +=  dt * (Du*Lu - uvv +  F*(u_res-u))
+    
+    du = Du*Lu - uvv +  F*(u_res-u)
+    u +=  dt * (du)
     v +=  dt * (Dv*Lv + uvv - alpha_s*vss - k_v*v)
     s +=  dt * (Ds*Ls + alpha_s*vss - k_s*s)
 
@@ -172,8 +184,8 @@ for i in range(iterations):
         im2.set_data(A)
         im2.set_clim(vmin=(A).min(), vmax=A.max())
         
-        im3.set_data(U)
-        im3.set_clim(vmin=U.min(), vmax=U.max())
+        im3.set_data(du)
+        im3.set_clim(vmin=du.min(), vmax=du.max())
 
         plt.draw()
         plt.pause(.0001)
